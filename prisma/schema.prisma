@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  host
+  teacher
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  identity     String   @unique // اسم المستخدم لتسجيل الدخول
+  passwordHash String   @map("password_hash")
+  role         Role     @default(teacher)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  teachingSlots ClassTimetable[] @relation("TeacherSlots")
+  weeklyPlans   WeeklyPlan[]     @relation("PlanCreatedBy")
+
+  @@map("users")
+}
+
+model Class {
+  id        String   @id @default(cuid())
+  name      String
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  timetable   ClassTimetable[]
+  weeklyPlans WeeklyPlan[]
+
+  @@map("classes")
+}
+
+model ClassTimetable {
+  id        String   @id @default(cuid())
+  classId   String   @map("class_id")
+  day       Int // 0 = الأحد ... 4 = الخميس
+  period    Int // 1 - 7
+  subject   String?
+  teacherId String?  @map("teacher_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher User? @relation("TeacherSlots", fields: [teacherId], references: [id], onDelete: SetNull)
+
+  @@unique([classId, day, period])
+  @@index([teacherId])
+  @@map("class_timetable")
+}
+
+model WeeklyPlan {
+  id        String   @id @default(cuid())
+  classId   String   @map("class_id")
+  day       Int // 0 - 4
+  period    Int // 1 - 7
+  weekStart DateTime @map("week_start") @db.Date
+  topic     String
+  page      String?
+  notes     String?
+  createdBy String?  @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  creator User? @relation("PlanCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@unique([classId, day, period, weekStart])
+  @@index([classId, weekStart])
+  @@map("weekly_plans")
+}

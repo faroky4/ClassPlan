@@ -1,0 +1,13 @@
+import { Suspense } from "react";
+
+import { LoginForm } from "@/components/LoginForm";
+
+export default function LoginPage() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-brand-50 to-white px-4">
+      <Suspense fallback={null}>
+        <LoginForm />
+      </Suspense>
+    </div>
+  );
+}
