@@ -16,11 +16,13 @@ export const createTeacherSchema = z.object({
   name: z.string().trim().min(2, "الاسم مطلوب").max(100),
   identity: identitySchema,
   password: passwordSchema,
+  classIds: z.array(z.string().min(1)).max(100).optional().default([]),
 });
 
 export const updateTeacherSchema = z.object({
   name: z.string().trim().min(2, "الاسم مطلوب").max(100).optional(),
   identity: identitySchema.optional(),
+  classIds: z.array(z.string().min(1)).max(100).optional(),
 });
 
 export const resetPasswordSchema = z.object({

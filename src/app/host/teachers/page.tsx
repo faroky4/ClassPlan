@@ -13,6 +13,11 @@ interface Teacher {
   classes: { id: string; name: string }[];
 }
 
+interface ClassOption {
+  id: string;
+  name: string;
+}
+
 type ModalMode = { type: "create" } | { type: "edit"; teacher: Teacher } | null;
 
 export default function TeachersPage() {
@@ -174,8 +179,30 @@ function TeacherFormModal({
   const [name, setName] = useState(isEdit ? mode.teacher.name : "");
   const [identity, setIdentity] = useState(isEdit ? mode.teacher.identity : "");
   const [password, setPassword] = useState("");
+  const [classOptions, setClassOptions] = useState<ClassOption[]>([]);
+  const [classesLoading, setClassesLoading] = useState(true);
+  const [selectedClassIds, setSelectedClassIds] = useState<Set<string>>(
+    new Set(isEdit ? mode.teacher.classes.map((c) => c.id) : []),
+  );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    api
+      .get<{ classes: ClassOption[] }>("/api/classes")
+      .then((data) => setClassOptions(data.classes))
+      .catch(() => setError("تعذر تحميل قائمة الصفوف"))
+      .finally(() => setClassesLoading(false));
+  }, []);
+
+  function toggleClass(classId: string) {
+    setSelectedClassIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(classId)) next.delete(classId);
+      else next.add(classId);
+      return next;
+    });
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -186,13 +213,15 @@ function TeacherFormModal({
       return;
     }
 
+    const classIds = Array.from(selectedClassIds);
+
     setLoading(true);
     try {
       if (isEdit) {
-        await api.patch(`/api/teachers/${mode.teacher.id}`, { name, identity });
+        await api.patch(`/api/teachers/${mode.teacher.id}`, { name, identity, classIds });
         showToast("تم تحديث بيانات المعلمة", "success");
       } else {
-        await api.post("/api/teachers", { name, identity, password });
+        await api.post("/api/teachers", { name, identity, password, classIds });
         showToast("تم إضافة المعلمة بنجاح", "success");
       }
       onSuccess();
@@ -205,7 +234,7 @@ function TeacherFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl">
+      <form onSubmit={handleSubmit} className="w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
         <h3 className="text-base font-bold text-gray-900">{isEdit ? "تعديل معلمة" : "إضافة معلمة"}</h3>
 
         {error && <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
@@ -231,6 +260,30 @@ function TeacherFormModal({
               />
             </div>
           )}
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              الصفوف المسؤولة عنها ({selectedClassIds.size})
+            </label>
+            {classesLoading ? (
+              <div className="text-sm text-gray-400">جارٍ تحميل الصفوف...</div>
+            ) : classOptions.length === 0 ? (
+              <div className="text-sm text-gray-400">لا يوجد صفوف بعد</div>
+            ) : (
+              <div className="grid max-h-48 grid-cols-2 gap-2 overflow-y-auto rounded-lg border border-gray-200 p-3 sm:grid-cols-3">
+                {classOptions.map((cls) => (
+                  <label key={cls.id} className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={selectedClassIds.has(cls.id)}
+                      onChange={() => toggleClass(cls.id)}
+                    />
+                    {cls.name}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="mt-5 flex justify-end gap-2">

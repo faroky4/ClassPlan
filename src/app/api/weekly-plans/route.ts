@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { ApiError, handleApiError, jsonError, requireSession } from "@/lib/session";
+import { teacherHasClassAccess } from "@/lib/teacher-classes";
 import { weekStartSchema, weeklyPlanSaveSchema } from "@/lib/validation";
 
 export async function GET(request: Request) {
@@ -20,11 +21,8 @@ export async function GET(request: Request) {
     if (!classItem) return jsonError("الصف غير موجود", 404);
 
     if (session.user.role === "teacher") {
-      const ownsSlot = await prisma.classTimetable.findFirst({
-        where: { classId, teacherId: session.user.id },
-        select: { id: true },
-      });
-      if (!ownsSlot) {
+      const hasAccess = await teacherHasClassAccess(session.user.id, classId);
+      if (!hasAccess) {
         throw new ApiError(403, "لا تملكين صلاحية الوصول لهذا الصف");
       }
     }

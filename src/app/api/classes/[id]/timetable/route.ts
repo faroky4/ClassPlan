@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { ApiError, handleApiError, jsonError, requireHost, requireSession } from "@/lib/session";
+import { teacherHasClassAccess } from "@/lib/teacher-classes";
 import { timetableUpdateSchema } from "@/lib/validation";
 
 export async function GET(_request: Request, { params }: { params: { id: string } }) {
@@ -14,11 +15,8 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     }
 
     if (session.user.role === "teacher") {
-      const ownsSlot = await prisma.classTimetable.findFirst({
-        where: { classId: params.id, teacherId: session.user.id },
-        select: { id: true },
-      });
-      if (!ownsSlot) {
+      const hasAccess = await teacherHasClassAccess(session.user.id, params.id);
+      if (!hasAccess) {
         throw new ApiError(403, "لا تملكين صلاحية الوصول لهذا الصف");
       }
     }

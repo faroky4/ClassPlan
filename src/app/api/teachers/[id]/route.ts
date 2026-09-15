@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { handleApiError, jsonError, requireHost } from "@/lib/session";
+import { syncTeacherClassAssignments } from "@/lib/teacher-classes";
 import { updateTeacherSchema } from "@/lib/validation";
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
@@ -28,6 +29,16 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       }
     }
 
+    if (parsed.data.classIds) {
+      const foundClasses = await prisma.class.findMany({
+        where: { id: { in: parsed.data.classIds } },
+        select: { id: true },
+      });
+      if (foundClasses.length !== new Set(parsed.data.classIds).size) {
+        return jsonError("أحد الصفوف المختارة غير موجود", 422);
+      }
+    }
+
     const updated = await prisma.user.update({
       where: { id: params.id },
       data: {
@@ -36,8 +47,22 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       },
     });
 
+    if (parsed.data.classIds) {
+      await syncTeacherClassAssignments(params.id, parsed.data.classIds);
+    }
+
+    const assignedClasses = await prisma.teacherClass.findMany({
+      where: { teacherId: params.id },
+      include: { class: { select: { id: true, name: true } } },
+    });
+
     return NextResponse.json({
-      teacher: { id: updated.id, name: updated.name, identity: updated.identity },
+      teacher: {
+        id: updated.id,
+        name: updated.name,
+        identity: updated.identity,
+        classes: assignedClasses.map((a) => ({ id: a.class.id, name: a.class.name })),
+      },
     });
   } catch (error) {
     return handleApiError(error);
