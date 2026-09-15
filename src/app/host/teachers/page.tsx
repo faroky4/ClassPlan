@@ -65,12 +65,12 @@ export default function TeachersPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">المعلمات</h1>
           <p className="mt-1 text-sm text-gray-500">إدارة حسابات المعلمات وصفوفهن</p>
         </div>
-        <button className="btn-primary" onClick={() => setModal({ type: "create" })}>
+        <button className="btn-primary w-full sm:w-auto" onClick={() => setModal({ type: "create" })}>
           + إضافة معلمة
         </button>
       </div>
@@ -78,11 +78,70 @@ export default function TeachersPage() {
       {loading && <div className="mt-8 text-sm text-gray-500">جارٍ التحميل...</div>}
       {error && <div className="mt-8 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
-      {!loading && !error && (
-        <div className="card mt-6 overflow-x-auto">
-          {teachers.length === 0 ? (
-            <div className="p-8 text-center text-sm text-gray-500">لا يوجد معلمات بعد</div>
-          ) : (
+      {!loading && !error && teachers.length === 0 && (
+        <div className="card mt-6 p-8 text-center text-sm text-gray-500">لا يوجد معلمات بعد</div>
+      )}
+
+      {!loading && !error && teachers.length > 0 && (
+        <>
+          {/* عرض البطاقات - للموبايل */}
+          <div className="mt-6 space-y-3 sm:hidden">
+            {teachers.map((teacher) => (
+              <div key={teacher.id} className="card p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="text-xs text-gray-400">الاسم</div>
+                    <div className="font-medium text-gray-900">{teacher.name}</div>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xs text-gray-400">اسم المستخدم</div>
+                    <div className="text-gray-600" dir="ltr">
+                      {teacher.identity}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3">
+                  <div className="text-xs text-gray-400">الصفوف</div>
+                  {teacher.classes.length === 0 ? (
+                    <span className="text-sm text-gray-400">لا يوجد</span>
+                  ) : (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {teacher.classes.map((c) => (
+                        <span key={c.id} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
+                          {c.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-gray-100 pt-3 text-xs">
+                  <button
+                    className="min-h-[44px] font-medium text-brand-600 hover:underline"
+                    onClick={() => setModal({ type: "edit", teacher })}
+                  >
+                    تعديل
+                  </button>
+                  <button
+                    className="min-h-[44px] font-medium text-amber-600 hover:underline"
+                    onClick={() => setResetModalTeacher(teacher)}
+                  >
+                    إعادة تعيين كلمة المرور
+                  </button>
+                  <button
+                    className="min-h-[44px] font-medium text-red-600 hover:underline"
+                    onClick={() => setDeleteTeacher(teacher)}
+                  >
+                    حذف
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* عرض الجدول - للشاشات المتوسطة فأكبر */}
+          <div className="card mt-6 hidden overflow-x-auto sm:block">
             <table className="w-full text-right text-sm">
               <thead className="bg-gray-50 text-gray-500">
                 <tr>
@@ -129,8 +188,8 @@ export default function TeachersPage() {
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
+          </div>
+        </>
       )}
 
       {modal && (
@@ -233,8 +292,8 @@ function TeacherFormModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+      <form onSubmit={handleSubmit} className="my-auto max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 shadow-xl">
         <h3 className="text-base font-bold text-gray-900">{isEdit ? "تعديل معلمة" : "إضافة معلمة"}</h3>
 
         {error && <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
@@ -335,8 +394,8 @@ function ResetPasswordModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+      <form onSubmit={handleSubmit} className="my-auto max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-xl bg-white p-5 shadow-xl">
         <h3 className="text-base font-bold text-gray-900">إعادة تعيين كلمة مرور {teacher.name}</h3>
 
         {error && <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}

@@ -37,7 +37,7 @@ export default function SettingsPage() {
           مسح جميع الخطط الأسبوعية المُعبّأة لكل الصفوف. لن يتأثر جدول الحصص ولا حسابات المعلمات أو
           الصفوف - فقط الخطط الأسبوعية سيتم حذفها نهائيًا ولا يمكن التراجع عن هذا الإجراء.
         </p>
-        <button className="btn-danger mt-4" onClick={() => setConfirmOpen(true)}>
+        <button className="btn-danger mt-4 w-full sm:w-auto" onClick={() => setConfirmOpen(true)}>
           مسح جميع الخطط الأسبوعية
         </button>
       </div>

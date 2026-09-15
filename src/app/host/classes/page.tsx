@@ -89,14 +89,23 @@ export default function ClassesPage() {
                 )}
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-3 text-xs">
-                <Link href={`/host/classes/${cls.id}/timetable`} className="font-medium text-brand-600 hover:underline">
+              <div className="mt-4 flex flex-wrap items-center gap-4 text-xs">
+                <Link
+                  href={`/host/classes/${cls.id}/timetable`}
+                  className="min-h-[44px] py-3 font-medium text-brand-600 hover:underline sm:min-h-0 sm:py-0"
+                >
                   بناء جدول الحصص
                 </Link>
-                <button className="font-medium text-gray-600 hover:underline" onClick={() => setEditClass(cls)}>
+                <button
+                  className="min-h-[44px] py-3 font-medium text-gray-600 hover:underline sm:min-h-0 sm:py-0"
+                  onClick={() => setEditClass(cls)}
+                >
                   تعديل
                 </button>
-                <button className="font-medium text-red-600 hover:underline" onClick={() => setDeleteClass(cls)}>
+                <button
+                  className="min-h-[44px] py-3 font-medium text-red-600 hover:underline sm:min-h-0 sm:py-0"
+                  onClick={() => setDeleteClass(cls)}
+                >
                   حذف
                 </button>
               </div>
@@ -186,8 +195,8 @@ function ClassFormModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+      <form onSubmit={handleSubmit} className="my-auto max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-xl bg-white p-5 shadow-xl">
         <h3 className="text-base font-bold text-gray-900">{isEdit ? "تعديل صف" : "إضافة صف"}</h3>
 
         {error && <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}

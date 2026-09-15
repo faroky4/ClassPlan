@@ -35,8 +35,8 @@ export function ConfirmDialog({
     loading || (requireTypedConfirmation ? typedValue !== requireTypedConfirmation : false);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+      <div className="my-auto max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-xl bg-white p-5 shadow-xl">
         <h3 className="text-base font-bold text-gray-900">{title}</h3>
         {description && <p className="mt-2 text-sm text-gray-600">{description}</p>}
 

@@ -70,14 +70,17 @@ export default function HostDashboardPage() {
             ) : (
               <ul className="divide-y divide-gray-100">
                 {stats.missingClasses.map((c) => (
-                  <li key={c.id} className="flex items-center justify-between py-3">
+                  <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
                     <div>
                       <div className="font-medium text-gray-900">{c.name}</div>
                       <div className="text-xs text-gray-500">
                         {c.filled} من {c.required} حصة مُعبّأة
                       </div>
                     </div>
-                    <Link href={`/host/classes/${c.id}/timetable`} className="text-sm font-medium text-brand-600 hover:underline">
+                    <Link
+                      href={`/host/classes/${c.id}/timetable`}
+                      className="text-sm font-medium text-brand-600 hover:underline"
+                    >
                       عرض الجدول
                     </Link>
                   </li>
