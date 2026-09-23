@@ -12,7 +12,7 @@ export default function TeacherClassPlanPage({ params }: { params: { id: string 
       </Link>
       <h1 className="mt-1 text-2xl font-bold text-gray-900">الخطة الأسبوعية</h1>
       <p className="no-print mt-1 text-sm text-gray-500">
-        يمكنك تعديل الحصص المسندة إليك فقط، وباقي الحصص للعرض فقط
+        اضغطي على أي حصة لتعديل خطتها
       </p>
 
       <div className="mt-4">

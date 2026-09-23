@@ -18,7 +18,6 @@ interface Cell {
   subject: string | null;
   teacherId: string | null;
   teacherName: string | null;
-  isEditable: boolean;
   plan: { id: string; topic: string; page: string | null; notes: string | null; updatedAt: string } | null;
 }
 
@@ -124,33 +123,27 @@ export function WeeklyPlanGrid({ classId, printable = false }: { classId: string
                       <button
                         key={period}
                         type="button"
-                        disabled={!cell.isEditable}
-                        onClick={() => cell.isEditable && setEditingCell(cell)}
-                        className={
-                          "flex w-full min-h-[44px] items-start gap-3 px-4 py-3 text-right text-xs transition-colors " +
-                          (cell.isEditable ? "bg-brand-50/40 hover:bg-brand-50 cursor-pointer" : "cursor-default")
-                        }
+                        onClick={() => setEditingCell(cell)}
+                        className="flex w-full min-h-[44px] cursor-pointer items-start gap-3 bg-brand-50/40 px-4 py-3 text-right text-xs transition-colors hover:bg-brand-50"
                       >
-                        <span
-                          className={
-                            "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold " +
-                            (cell.isEditable ? "bg-brand-100 text-brand-700" : "bg-gray-100 text-gray-500")
-                          }
-                        >
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[11px] font-bold text-brand-700">
                           {period}
                         </span>
-                        <span className="flex flex-1 flex-col gap-0.5">
+                        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                           <span className="font-bold text-gray-800">{cell.subject}</span>
                           <span className="text-[11px] text-gray-500">{cell.teacherName ?? "بدون معلمة"}</span>
                           {cell.plan ? (
-                            <span className="mt-1 text-[11px] font-medium text-emerald-700">
-                              {cell.plan.topic}
-                              {cell.plan.page ? ` - ص${cell.plan.page}` : ""}
-                            </span>
+                            <>
+                              <span className="mt-1 text-[11px] font-medium text-emerald-700">
+                                {cell.plan.topic}
+                                {cell.plan.page ? ` - ص${cell.plan.page}` : ""}
+                              </span>
+                              {cell.plan.notes && (
+                                <span className="truncate text-[10px] text-gray-400">{cell.plan.notes}</span>
+                              )}
+                            </>
                           ) : (
-                            <span className="mt-1 text-[11px] text-amber-600">
-                              {cell.isEditable ? "لم تُعبّأ بعد" : "بانتظار المعلمة"}
-                            </span>
+                            <span className="mt-1 text-[11px] text-amber-600">لم تُعبّأ بعد</span>
                           )}
                         </span>
                       </button>
@@ -183,7 +176,7 @@ export function WeeklyPlanGrid({ classId, printable = false }: { classId: string
                       if (!cell || !cell.subject) {
                         return (
                           <td key={day} className="p-0">
-                            <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-xs text-gray-300">
+                            <div className="flex h-28 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-xs text-gray-300">
                               لا يوجد حصة
                             </div>
                           </td>
@@ -194,26 +187,25 @@ export function WeeklyPlanGrid({ classId, printable = false }: { classId: string
                         <td key={day} className="p-0 align-top">
                           <button
                             type="button"
-                            disabled={!cell.isEditable}
-                            onClick={() => cell.isEditable && setEditingCell(cell)}
-                            className={
-                              "flex h-24 w-full flex-col items-start justify-start gap-0.5 rounded-lg border p-2 text-right text-xs transition-colors " +
-                              (cell.isEditable
-                                ? "border-brand-200 bg-brand-50 hover:bg-brand-100 cursor-pointer"
-                                : "border-gray-200 bg-gray-100 text-gray-500 cursor-default")
-                            }
+                            onClick={() => setEditingCell(cell)}
+                            className="flex h-28 w-full cursor-pointer flex-col items-start justify-start gap-0.5 overflow-hidden rounded-lg border border-brand-200 bg-brand-50 p-2 text-right text-xs transition-colors hover:bg-brand-100"
                           >
                             <span className="font-bold text-gray-800">{cell.subject}</span>
                             <span className="text-[11px] text-gray-500">{cell.teacherName ?? "بدون معلمة"}</span>
                             {cell.plan ? (
-                              <span className="mt-1 line-clamp-2 w-full text-[11px] font-medium text-emerald-700">
-                                {cell.plan.topic}
-                                {cell.plan.page ? ` - ص${cell.plan.page}` : ""}
-                              </span>
+                              <>
+                                <span className="mt-1 line-clamp-2 w-full text-[11px] font-medium text-emerald-700">
+                                  {cell.plan.topic}
+                                  {cell.plan.page ? ` - ص${cell.plan.page}` : ""}
+                                </span>
+                                {cell.plan.notes && (
+                                  <span className="block w-full truncate text-[10px] text-gray-400">
+                                    {cell.plan.notes}
+                                  </span>
+                                )}
+                              </>
                             ) : (
-                              <span className="mt-1 text-[11px] text-amber-600">
-                                {cell.isEditable ? "لم تُعبّأ بعد" : "بانتظار المعلمة"}
-                              </span>
+                              <span className="mt-1 text-[11px] text-amber-600">لم تُعبّأ بعد</span>
                             )}
                           </button>
                         </td>

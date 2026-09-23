@@ -43,9 +43,6 @@ export async function GET(request: Request) {
 
     const cells = slots.map((slot) => {
       const plan = plansMap.get(planKey(slot.day, slot.period));
-      const isEditable =
-        session.user.role === "host" ||
-        (Boolean(slot.teacherId) && slot.teacherId === session.user.id);
 
       return {
         day: slot.day,
@@ -53,7 +50,6 @@ export async function GET(request: Request) {
         subject: slot.subject,
         teacherId: slot.teacherId,
         teacherName: slot.teacher?.name ?? null,
-        isEditable,
         plan: plan
           ? {
               id: plan.id,
@@ -87,19 +83,20 @@ export async function POST(request: Request) {
     }
     const { classId, day, period, weekStart, topic, page, notes } = parsed.data;
 
+    // المعلمة تعدّل أي حصة داخل صف مسند إليها، بغض النظر عن معلمة المادة في جدول الحصص
+    if (session.user.role === "teacher") {
+      const hasAccess = await teacherHasClassAccess(session.user.id, classId);
+      if (!hasAccess) {
+        throw new ApiError(403, "لا تملكين صلاحية الوصول لهذا الصف");
+      }
+    }
+
     const slot = await prisma.classTimetable.findUnique({
       where: { classId_day_period: { classId, day, period } },
     });
 
     if (!slot) {
       return jsonError("لا توجد حصة مسجّلة في هذه الخانة", 404);
-    }
-
-    const isHost = session.user.role === "host";
-    const ownsSlot = slot.teacherId === session.user.id;
-
-    if (!isHost && !ownsSlot) {
-      throw new ApiError(403, "لست مخوّلة لتعديل هذه الحصة");
     }
 
     const plan = await prisma.weeklyPlan.upsert({
