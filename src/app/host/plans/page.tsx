@@ -31,8 +31,8 @@ export default function HostPlansPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">الخطط الأسبوعية</h1>
-      <p className="mt-1 text-sm text-gray-500">استعرض وعدّل خطط أي صف حسب الأسبوع</p>
+      <h1 className="text-2xl font-bold text-gray-900 print:hidden">الخطط الأسبوعية</h1>
+      <p className="no-print mt-1 text-sm text-gray-500">استعرض وعدّل خطط أي صف حسب الأسبوع</p>
 
       {loading && <div className="mt-8 text-sm text-gray-500">جارٍ التحميل...</div>}
       {error && <div className="mt-8 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}

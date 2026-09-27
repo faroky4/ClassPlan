@@ -10,9 +10,9 @@ export default async function HostLayout({ children }: { children: React.ReactNo
   if (session.user.role !== "host") redirect("/teacher");
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 lg:flex-row">
+    <div className="flex min-h-screen flex-col bg-gray-50 lg:flex-row print:bg-white">
       <HostSidebar userName={session.user.name} />
-      <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:overflow-y-auto lg:p-8">{children}</main>
+      <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:overflow-y-auto lg:p-8 print:overflow-visible print:p-0">{children}</main>
     </div>
   );
 }

@@ -12,12 +12,29 @@ body {
   color: #101828;
 }
 
+@page {
+  size: A4 landscape;
+  margin: 8mm;
+}
+
 @media print {
   .no-print {
     display: none !important;
   }
+  html,
+  body {
+    height: auto;
+  }
   body {
     background: white;
+  }
+  /* الحفاظ على خلفيات الخانات وماركر الملاحظة عند الطباعة */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .plan-table tr {
+    break-inside: avoid;
   }
 }
 

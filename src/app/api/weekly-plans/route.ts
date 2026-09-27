@@ -56,6 +56,7 @@ export async function GET(request: Request) {
               topic: plan.topic,
               page: plan.page,
               notes: plan.notes,
+              noteColorTag: plan.noteColorTag,
               updatedAt: plan.updatedAt,
             }
           : null,
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return jsonError(parsed.error.issues[0]?.message ?? "بيانات غير صحيحة", 422);
     }
-    const { classId, day, period, weekStart, topic, page, notes } = parsed.data;
+    const { classId, day, period, weekStart, topic, page, notes, noteColorTag } = parsed.data;
 
     // المعلمة تعدّل أي حصة داخل صف مسند إليها، بغض النظر عن معلمة المادة في جدول الحصص
     if (session.user.role === "teacher") {
@@ -116,12 +117,14 @@ export async function POST(request: Request) {
         topic,
         page: page || null,
         notes: notes || null,
+        noteColorTag: noteColorTag ?? null,
         createdBy: session.user.id,
       },
       update: {
         topic,
         page: page || null,
         notes: notes || null,
+        noteColorTag: noteColorTag ?? null,
       },
     });
 
@@ -131,6 +134,7 @@ export async function POST(request: Request) {
         topic: plan.topic,
         page: plan.page,
         notes: plan.notes,
+        noteColorTag: plan.noteColorTag,
         updatedAt: plan.updatedAt,
       },
     });

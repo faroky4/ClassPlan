@@ -10,7 +10,7 @@ export default function TeacherClassPlanPage({ params }: { params: { id: string 
       <Link href="/teacher" className="no-print text-sm text-gray-500 hover:underline">
         &larr; رجوع لصفوفي
       </Link>
-      <h1 className="mt-1 text-2xl font-bold text-gray-900">الخطة الأسبوعية</h1>
+      <h1 className="mt-1 text-2xl font-bold text-gray-900 print:hidden">الخطة الأسبوعية</h1>
       <p className="no-print mt-1 text-sm text-gray-500">
         اضغطي على أي حصة لتعديل خطتها
       </p>

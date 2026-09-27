@@ -11,6 +11,7 @@ import {
   PERIODS,
   shiftWeekKey,
 } from "@/lib/date-utils";
+import type { NoteColorTag } from "@/lib/validation";
 
 interface Cell {
   day: number;
@@ -18,7 +19,36 @@ interface Cell {
   subject: string | null;
   teacherId: string | null;
   teacherName: string | null;
-  plan: { id: string; topic: string; page: string | null; notes: string | null; updatedAt: string } | null;
+  plan: {
+    id: string;
+    topic: string;
+    page: string | null;
+    notes: string | null;
+    noteColorTag: NoteColorTag | null;
+    updatedAt: string;
+  } | null;
+}
+
+const NOTE_COLOR_OPTIONS: { value: NoteColorTag; label: string; swatch: string; tag: string }[] = [
+  { value: "green", label: "أخضر", swatch: "bg-green-300", tag: "border-green-400 bg-green-50" },
+  { value: "orange", label: "برتقالي", swatch: "bg-orange-300", tag: "border-orange-400 bg-orange-50" },
+  { value: "yellow", label: "أصفر", swatch: "bg-yellow-300", tag: "border-yellow-400 bg-yellow-50" },
+];
+
+/** نص الملاحظة بالأحمر، مع ماركر لوني اختياري حول النص فقط. بالطباعة يلتف النص كاملًا بدون قص. */
+function PlanNote({ notes, colorTag, className = "" }: { notes: string; colorTag: NoteColorTag | null; className?: string }) {
+  const tag = NOTE_COLOR_OPTIONS.find((o) => o.value === colorTag)?.tag;
+  return (
+    <span
+      className={
+        "block max-w-full shrink-0 text-[10.5px] font-medium leading-snug text-red-600 print:line-clamp-none print:break-words " +
+        (tag ? `w-fit rounded border px-1 ${tag} ` : "w-full ") +
+        className
+      }
+    >
+      {notes}
+    </span>
+  );
 }
 
 interface WeeklyPlanResponse {
@@ -89,7 +119,8 @@ export function WeeklyPlanGrid({ classId, printable = false }: { classId: string
         )}
       </div>
 
-      <div className="mt-3 text-sm font-medium text-gray-700">
+      <div className="mt-3 text-sm font-medium text-gray-700 print:mt-0 print:font-bold print:text-gray-900">
+        {data && <span className="hidden print:inline">{data.class.name} — </span>}
         أسبوع {formatWeekRangeLabel(weekStart)}
       </div>
 
@@ -139,7 +170,11 @@ export function WeeklyPlanGrid({ classId, printable = false }: { classId: string
                                 {cell.plan.page ? ` - ص${cell.plan.page}` : ""}
                               </span>
                               {cell.plan.notes && (
-                                <span className="truncate text-[10px] text-gray-400">{cell.plan.notes}</span>
+                                <PlanNote
+                                  notes={cell.plan.notes}
+                                  colorTag={cell.plan.noteColorTag}
+                                  className="line-clamp-3 break-words"
+                                />
                               )}
                             </>
                           ) : (
@@ -155,13 +190,13 @@ export function WeeklyPlanGrid({ classId, printable = false }: { classId: string
           </div>
 
           {/* عرض الجدول - للشاشات المتوسطة فأكبر */}
-          <div className="card mt-4 hidden overflow-x-auto p-4 sm:block print:block print:border-0 print:shadow-none">
-            <table className="w-full min-w-[760px] border-separate border-spacing-1 text-center text-sm">
+          <div className="card mt-4 hidden overflow-x-auto p-4 sm:block print:mt-2 print:block print:overflow-visible print:border-0 print:p-0 print:shadow-none">
+            <table className="plan-table w-full min-w-[760px] border-separate border-spacing-1 text-center text-sm table-fixed print:min-w-0 print:border-spacing-0.5">
               <thead>
                 <tr>
-                  <th className="w-16 p-2 text-gray-500">الحصة</th>
+                  <th className="w-16 p-2 text-gray-500 print:w-10 print:p-1">الحصة</th>
                   {DAY_NAMES.map((day) => (
-                    <th key={day} className="p-2 text-gray-500">
+                    <th key={day} className="p-2 text-gray-500 print:p-1">
                       {day}
                     </th>
                   ))}
@@ -175,8 +210,8 @@ export function WeeklyPlanGrid({ classId, printable = false }: { classId: string
                       const cell = cellAt(day, period);
                       if (!cell || !cell.subject) {
                         return (
-                          <td key={day} className="p-0">
-                            <div className="flex h-28 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-xs text-gray-300">
+                          <td key={day} className="p-0 print:h-px">
+                            <div className="flex h-28 print:h-full print:min-h-[2.75rem] items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-xs text-gray-300">
                               لا يوجد حصة
                             </div>
                           </td>
@@ -184,24 +219,22 @@ export function WeeklyPlanGrid({ classId, printable = false }: { classId: string
                       }
 
                       return (
-                        <td key={day} className="p-0 align-top">
+                        <td key={day} className="p-0 align-top print:h-px">
                           <button
                             type="button"
                             onClick={() => setEditingCell(cell)}
-                            className="flex h-28 w-full cursor-pointer flex-col items-start justify-start gap-0.5 overflow-hidden rounded-lg border border-brand-200 bg-brand-50 p-2 text-right text-xs transition-colors hover:bg-brand-100"
+                            className="flex h-28 w-full cursor-pointer flex-col items-start justify-start gap-0.5 overflow-hidden rounded-lg print:h-full print:min-h-[2.75rem] print:overflow-visible print:p-1.5 print:leading-tight border border-brand-200 bg-brand-50 p-2 text-right text-xs transition-colors hover:bg-brand-100"
                           >
                             <span className="font-bold text-gray-800">{cell.subject}</span>
                             <span className="text-[11px] text-gray-500">{cell.teacherName ?? "بدون معلمة"}</span>
                             {cell.plan ? (
                               <>
-                                <span className="mt-1 line-clamp-2 w-full text-[11px] font-medium text-emerald-700">
+                                <span className="mt-1 line-clamp-2 w-full shrink-0 text-[11px] font-medium text-emerald-700 print:line-clamp-none print:break-words">
                                   {cell.plan.topic}
                                   {cell.plan.page ? ` - ص${cell.plan.page}` : ""}
                                 </span>
                                 {cell.plan.notes && (
-                                  <span className="block w-full truncate text-[10px] text-gray-400">
-                                    {cell.plan.notes}
-                                  </span>
+                                  <PlanNote notes={cell.plan.notes} colorTag={cell.plan.noteColorTag} className="line-clamp-2 break-words" />
                                 )}
                               </>
                             ) : (
@@ -252,6 +285,7 @@ function PlanEditModal({
   const [topic, setTopic] = useState(cell.plan?.topic ?? "");
   const [page, setPage] = useState(cell.plan?.page ?? "");
   const [notes, setNotes] = useState(cell.plan?.notes ?? "");
+  const [noteColorTag, setNoteColorTag] = useState<NoteColorTag | null>(cell.plan?.noteColorTag ?? null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -274,6 +308,7 @@ function PlanEditModal({
         topic: topic.trim(),
         page: page.trim() || null,
         notes: notes.trim() || null,
+        noteColorTag,
       });
       onSaved();
     } catch (err) {
@@ -310,6 +345,34 @@ function PlanEditModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">لون ماركر الملاحظة</label>
+            <div className="flex flex-wrap gap-2" role="radiogroup">
+              {[{ value: null, label: "بدون لون", swatch: "border border-dashed border-gray-400 bg-white" }, ...NOTE_COLOR_OPTIONS].map(
+                (opt) => {
+                  const selected = noteColorTag === opt.value;
+                  return (
+                    <button
+                      key={opt.value ?? "none"}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => setNoteColorTag(opt.value)}
+                      className={
+                        "inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors " +
+                        (selected
+                          ? "border-brand-500 bg-brand-50 font-medium text-brand-700 ring-2 ring-brand-100"
+                          : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50")
+                      }
+                    >
+                      <span className={`h-3.5 w-3.5 rounded-full ${opt.swatch}`} />
+                      {opt.label}
+                    </button>
+                  );
+                },
+              )}
+            </div>
           </div>
         </div>
 

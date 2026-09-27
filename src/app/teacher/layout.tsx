@@ -10,9 +10,9 @@ export default async function TeacherLayout({ children }: { children: React.Reac
   if (session.user.role !== "teacher") redirect("/host");
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 print:bg-white">
       <TeacherHeader userName={session.user.name} />
-      <main className="mx-auto max-w-5xl p-4 lg:p-8">{children}</main>
+      <main className="mx-auto max-w-5xl p-4 lg:p-8 print:max-w-none print:p-0">{children}</main>
     </div>
   );
 }

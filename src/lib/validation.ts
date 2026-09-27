@@ -54,6 +54,9 @@ export const weekStartSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "صيغة تاريخ الأسبوع غير صحيحة");
 
+export const NOTE_COLOR_TAGS = ["green", "orange", "yellow"] as const;
+export type NoteColorTag = (typeof NOTE_COLOR_TAGS)[number];
+
 export const weeklyPlanSaveSchema = z.object({
   classId: z.string().min(1),
   day: z.number().int().min(0).max(4),
@@ -62,6 +65,7 @@ export const weeklyPlanSaveSchema = z.object({
   topic: z.string().trim().min(1, "الموضوع مطلوب").max(300),
   page: z.string().trim().max(50).nullable().optional(),
   notes: z.string().trim().max(1000).nullable().optional(),
+  noteColorTag: z.enum(NOTE_COLOR_TAGS).nullable().optional(),
 });
 
 export const clearPlansSchema = z.object({
